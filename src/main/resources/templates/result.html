@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>결과 - 메이플 길드 TD</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="page">
+    <h2 class="title">🏆 게임 결과</h2>
+
+    <!-- 내 결과 -->
+    <div class="card result-card">
+        <div class="result-row"><span>플레이어</span><strong id="resPlayer"></strong></div>
+        <div class="result-row"><span>길드</span><strong id="resGuild"></strong></div>
+        <div class="result-row"><span>클리어 라운드</span><strong id="resRound" class="highlight"></strong></div>
+        <div class="result-row"><span>선택한 길드원</span><div id="resTowers" class="tower-chips"></div></div>
+    </div>
+
+    <!-- 랭킹 -->
+    <h3 class="section-title">🥇 전체 랭킹 Top 10</h3>
+    <table class="ranking-table">
+        <thead>
+        <tr>
+            <th>순위</th>
+            <th>플레이어</th>
+            <th>길드</th>
+            <th>클리어 라운드</th>
+            <th>플레이 일시</th>
+        </tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+    </table>
+
+    <button class="btn-primary" onclick="location.href='index.html'">처음으로</button>
+</div>
+
+<script src="/js/result.js"></script>
+</body>
+</html>

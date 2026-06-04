@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>길드원 선택 - 메이플 길드 TD</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="page">
+
+    <!-- 길드 정보 헤더 -->
+    <div class="guild-header card">
+        <div id="guildInfo" class="guild-info-text">길드 정보 로딩 중...</div>
+        <div class="sort-controls">
+            <span>정렬:</span>
+            <button class="btn-sort active" data-sort="combatPower">전투력</button>
+            <button class="btn-sort" data-sort="level">레벨</button>
+            <button class="btn-sort" data-sort="name">이름</button>
+        </div>
+    </div>
+
+    <!-- 진행률 바 -->
+    <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <p id="progressText">길드원 정보 불러오는 중... 0 / 0</p>
+    </div>
+
+    <!-- 선택 안내 -->
+    <div class="select-guide">
+        <span id="selectedCount">0</span>명 선택됨
+        <span class="guide-hint">(최소 3명, 최대 10명 선택)</span>
+        <button class="btn-primary" id="startBtn" disabled>게임 시작</button>
+    </div>
+
+    <!-- 길드원 카드 목록 -->
+    <div class="member-grid" id="memberGrid"></div>
+</div>
+
+<script src="/js/guild.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>메이플 길드 TD</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="page-center">
+    <h1 class="title">⚔️ 메이플 길드 TD</h1>
+    <p class="subtitle">길드원을 타워로 배치해 몬스터를 막아라!</p>
+
+    <form class="card" id="guildForm">
+        <label>넥슨 API Key
+            <input type="password" id="apiKey" placeholder="발급받은 API Key를 입력하세요" required />
+        </label>
+        <label>길드명
+            <input type="text" id="guildName" placeholder="길드 이름" required />
+        </label>
+        <label>월드명
+            <select id="worldName">
+                <option>스카니아</option>
+                <option>베라</option>
+                <option>루나</option>
+                <option>제니스</option>
+                <option>크로아</option>
+                <option>유니온</option>
+                <option>엘리시움</option>
+                <option>이노시스</option>
+                <option>레드</option>
+                <option>오로라</option>
+                <option>아케인</option>
+                <option>노바</option>
+                <option>리부트</option>
+                <option>리부트2</option>
+                <option>버닝</option>
+                <option>버닝2</option>
+                <option>버닝3</option>
+            </select>
+        </label>
+        <button type="submit" class="btn-primary">길드 조회</button>
+        <p class="error-msg" id="errorMsg"></p>
+    </form>
+</div>
+
+<script src="/js/index.js"></script>
+</body>
+</html>

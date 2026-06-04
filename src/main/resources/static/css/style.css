@@ -1,0 +1,221 @@
+/* ── 리셋 & 변수 ─────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --primary: #f6a623;
+    --primary-dark: #d4891a;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --success: #3fb950;
+    --danger: #f85149;
+    --card-selected: rgba(246,166,35,0.15);
+    --radius: 10px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+}
+
+/* ── 레이아웃 ─────────────────────────────── */
+.page-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ── 공통 카드 ────────────────────────────── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+}
+
+/* ── 타이틀 ─────────────────────────────── */
+.title { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; }
+.subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+.section-title { font-size: 1.2rem; margin: 2rem 0 1rem; }
+
+/* ── 폼 ─────────────────────────────────── */
+form label {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    margin-bottom: 1.2rem;
+    font-size: .9rem;
+    color: var(--text-muted);
+}
+
+form input, form select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: .6rem .9rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color .2s;
+}
+form input:focus, form select:focus { border-color: var(--primary); }
+
+/* ── 버튼 ────────────────────────────────── */
+.btn-primary {
+    background: var(--primary);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: .7rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    width: 100%;
+    margin-top: .5rem;
+}
+.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-sort {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    padding: .3rem .8rem;
+    cursor: pointer;
+    font-size: .85rem;
+    transition: all .2s;
+}
+.btn-sort.active, .btn-sort:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── 에러 메시지 ──────────────────────────── */
+.error-msg { color: var(--danger); font-size: .85rem; margin-top: .5rem; min-height: 1.2rem; }
+
+/* ── 길드 헤더 ────────────────────────────── */
+.guild-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.guild-info-text { font-size: 1.1rem; font-weight: 600; }
+.sort-controls { display: flex; align-items: center; gap: .5rem; font-size: .9rem; color: var(--text-muted); }
+
+/* ── 진행률 바 ────────────────────────────── */
+.progress-wrap { margin-bottom: 1.5rem; }
+.progress-bar-bg {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: .4rem;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 99px;
+    width: 0%;
+    transition: width .3s ease;
+}
+#progressText { font-size: .85rem; color: var(--text-muted); }
+
+/* ── 선택 안내 ────────────────────────────── */
+.select-guide {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.select-guide #selectedCount { color: var(--primary); font-weight: 700; font-size: 1.1rem; }
+.guide-hint { color: var(--text-muted); font-size: .85rem; flex: 1; }
+.select-guide .btn-primary { width: auto; margin-top: 0; }
+
+/* ── 길드원 카드 그리드 ───────────────────── */
+.member-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.member-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    user-select: none;
+}
+.member-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.member-card.selected {
+    border-color: var(--primary);
+    background: var(--card-selected);
+}
+.member-card img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: .4rem;
+}
+.member-card .m-name { font-size: .9rem; font-weight: 600; margin-bottom: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member-card .m-job  { font-size: .75rem; color: var(--text-muted); margin-bottom: .3rem; }
+.member-card .m-cp   { font-size: .8rem; color: var(--primary); font-weight: 600; }
+.member-card .m-level{ font-size: .75rem; color: var(--text-muted); }
+
+/* ── 결과 페이지 ──────────────────────────── */
+.result-card { max-width: 560px; }
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .95rem;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row span { color: var(--text-muted); }
+.highlight { color: var(--primary); font-size: 1.4rem; }
+.tower-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.tower-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: .2rem .7rem;
+    font-size: .8rem;
+}
+
+/* ── 랭킹 테이블 ──────────────────────────── */
+.ranking-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+.ranking-table th, .ranking-table td {
+    padding: .7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    font-size: .9rem;
+}
+.ranking-table th { color: var(--text-muted); font-weight: 500; }
+.ranking-table tr.my-row td { background: var(--card-selected); }
+.ranking-table tr:first-child td:first-child { color: #ffd700; font-weight: 700; }
+.ranking-table tr:nth-child(2) td:first-child { color: #c0c0c0; font-weight: 700; }
+.ranking-table tr:nth-child(3) td:first-child { color: #cd7f32; font-weight: 700; }
