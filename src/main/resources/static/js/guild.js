@@ -130,5 +130,5 @@ document.querySelectorAll('.btn-sort').forEach(btn => {
 document.getElementById('startBtn').addEventListener('click', () => {
     const selected = members.filter(m => selectedNames.has(m.characterName));
     sessionStorage.setItem('selectedMembers', JSON.stringify(selected));
-    location.href = 'game.html';
+    location.href = '/games';
 });

@@ -1,10 +1,886 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메이플 길드 TD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ── 리셋 & 변수 ───────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:            #0d1117;
+            --surface:       #161b22;
+            --surface-2:     #1c2330;
+            --border:        #30363d;
+            --border-bright: #484f58;
+            --primary:       #f6a623;
+            --primary-dark:  #d4891a;
+            --primary-glow:  rgba(246, 166, 35, 0.25);
+            --text:          #e6edf3;
+            --text-muted:    #8b949e;
+            --success:       #3fb950;
+            --danger:        #f85149;
+            --info:          #58a6ff;
+            --radius:        8px;
+            --panel-w:       280px;
+            --hud-h:         56px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans KR', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HUD (상단 바) ──────────────────────────────────── */
+        #hud {
+            height: var(--hud-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1.5rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hud-logo {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            margin-right: .5rem;
+        }
+
+        .hud-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--border);
+        }
+
+        .hud-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 64px;
+        }
+        .hud-stat .label {
+            font-size: .65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .hud-stat .value {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .hud-stat .value.gold  { color: var(--primary); }
+        .hud-stat .value.hp    { color: var(--danger); }
+        .hud-stat .value.round { color: var(--info); }
+        .hud-stat .value.score { color: var(--success); }
+
+        /* HP 바 */
+        .hud-hp-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 120px;
+        }
+        .hud-hp-wrap .label { font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+        .hp-bar-bg {
+            background: rgba(248,81,73,0.2);
+            border: 1px solid rgba(248,81,73,0.4);
+            border-radius: 99px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .hp-bar-fill {
+            height: 100%;
+            background: var(--danger);
+            border-radius: 99px;
+            width: 100%;
+            transition: width .4s ease;
+        }
+
+        /* 오른쪽 영역 */
+        .hud-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .btn-wave {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: var(--radius);
+            padding: .45rem 1.1rem;
+            font-size: .85rem;
+            font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            white-space: nowrap;
+        }
+        .btn-wave:hover { background: var(--primary-dark); }
+        .btn-wave:active { transform: scale(.97); }
+        .btn-wave:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+        .btn-speed {
+            background: var(--surface-2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: .4rem .75rem;
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-speed.active, .btn-speed:hover {
+            border-color: var(--info);
+            color: var(--info);
+        }
+
+        /* 웨이브 진행 표시 */
+        .wave-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 140px;
+        }
+        .wave-progress .label {
+            font-size: .65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .wave-bar-bg {
+            background: rgba(88,166,255,0.15);
+            border: 1px solid rgba(88,166,255,0.3);
+            border-radius: 99px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .wave-bar-fill {
+            height: 100%;
+            background: var(--info);
+            border-radius: 99px;
+            width: 0%;
+            transition: width .3s ease;
+        }
+
+        /* ── 메인 레이아웃 ───────────────────────────────────── */
+        #main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── 캔버스 영역 ──────────────────────────────────────  */
+        #canvas-wrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background:
+                    radial-gradient(ellipse 60% 40% at 50% 30%, rgba(246,166,35,0.04) 0%, transparent 70%),
+                    var(--bg);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        /* 캔버스 위 오버레이 메시지 */
+        #canvas-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .overlay-msg {
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius);
+            padding: 1.2rem 2.5rem;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+        .overlay-msg h2 {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: .3rem;
+        }
+        .overlay-msg p {
+            font-size: .85rem;
+            color: var(--text-muted);
+        }
+
+        /* 배치 모드 커서 힌트 */
+        #place-hint {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(13,17,23,0.8);
+            border: 1px solid var(--primary);
+            border-radius: 99px;
+            padding: .35rem 1.2rem;
+            font-size: .8rem;
+            color: var(--primary);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        #place-hint.visible { opacity: 1; }
+
+        /* ── 우측 패널 ──────────────────────────────────────── */
+        #side-panel {
+            width: var(--panel-w);
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .panel-section {
+            border-bottom: 1px solid var(--border);
+            padding: .85rem 1rem;
+        }
+        .panel-section:last-child { border-bottom: none; }
+
+        .panel-title {
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: .7rem;
+        }
+
+        /* 배치 가능 타워 목록 */
+        #tower-list {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - var(--hud-h) - 280px);
+        }
+
+        .tower-item {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .5rem .65rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+            background: var(--bg);
+            position: relative;
+        }
+        .tower-item:hover { border-color: var(--border-bright); }
+        .tower-item.selected {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+        .tower-item.placed {
+            opacity: .45;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* 타워 아이콘 (직업군 색상 원) */
+        .tower-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .65rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .tower-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tower-info { flex: 1; min-width: 0; }
+        .tower-name {
+            font-size: .82rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tower-job {
+            font-size: .7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tower-cost {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        /* 타워 배치 카운터 뱃지 */
+        .placed-badge {
+            position: absolute;
+            top: 4px; right: 4px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: var(--success);
+            color: #000;
+            font-size: .6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── 선택된 타워 상세 패널 ──────────────────────────── */
+        #tower-detail {
+            border-bottom: 1px solid var(--border);
+            padding: .85rem 1rem;
+            min-height: 130px;
+        }
+
+        .detail-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 90px;
+            color: var(--text-muted);
+            font-size: .8rem;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            margin-bottom: .75rem;
+        }
+        .detail-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .detail-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-name { font-size: .95rem; font-weight: 700; }
+        .detail-job  { font-size: .75rem; color: var(--text-muted); }
+
+        .detail-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .3rem .5rem;
+            margin-bottom: .75rem;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .75rem;
+        }
+        .stat-row .k { color: var(--text-muted); }
+        .stat-row .v { font-weight: 700; }
+
+        /* 패시브 스킬 태그 */
+        .passive-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            background: rgba(63,185,80,0.12);
+            border: 1px solid rgba(63,185,80,0.35);
+            border-radius: 99px;
+            padding: .15rem .6rem;
+            font-size: .7rem;
+            color: var(--success);
+            margin-bottom: .6rem;
+        }
+        .passive-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        /* ── 액티브 스킬 버튼 ────────────────────────────────── */
+        #active-skill-wrap {
+            padding: .85rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .active-skill-btn {
+            width: 100%;
+            position: relative;
+            background: var(--surface-2);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius);
+            padding: .65rem .9rem;
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--text);
+            text-align: left;
+        }
+        .active-skill-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+        .active-skill-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .skill-icon-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .9rem;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .skill-btn-info { flex: 1; min-width: 0; }
+        .skill-btn-name { font-size: .82rem; font-weight: 700; }
+        .skill-btn-desc { font-size: .68rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 쿨다운 오버레이 */
+        .skill-cooldown-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            background: rgba(13,17,23,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .15s;
+        }
+        .skill-cooldown-overlay.visible { opacity: 1; }
+
+        /* 쿨다운 링 (svg) */
+        .cooldown-ring-wrap {
+            position: relative;
+            width: 34px; height: 34px;
+            flex-shrink: 0;
+        }
+        .cooldown-ring-svg {
+            position: absolute;
+            inset: 0;
+            transform: rotate(-90deg);
+        }
+        .cooldown-ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 3; }
+        .cooldown-ring-fg { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset .1s linear; }
+
+        /* 배치 없을 때 비활성 표시 */
+        .no-tower-msg {
+            font-size: .75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: .5rem 0;
+        }
+
+        /* ── 게임 로그 ───────────────────────────────────────── */
+        #game-log {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #log-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: .5rem .75rem;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: .2rem;
+        }
+        #log-list::-webkit-scrollbar { width: 4px; }
+        #log-list::-webkit-scrollbar-track { background: transparent; }
+        #log-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+        .log-entry {
+            font-size: .72rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            padding: .15rem 0;
+        }
+        .log-entry.warn  { color: var(--primary); }
+        .log-entry.good  { color: var(--success); }
+        .log-entry.bad   { color: var(--danger); }
+        .log-entry.info  { color: var(--info); }
+
+        /* ── 게임 상태 오버레이 (시작/종료) ──────────────────── */
+        #game-state-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13,17,23,0.92);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        #game-state-overlay.hidden { display: none; }
+
+        .state-card {
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            border-radius: 12px;
+            padding: 2.5rem 3rem;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: pop-in .3s ease;
+        }
+        @keyframes pop-in {
+            from { transform: scale(.9); opacity: 0; }
+            to   { transform: scale(1);  opacity: 1; }
+        }
+
+        .state-card .state-icon {
+            font-size: 3rem;
+            margin-bottom: .5rem;
+            display: block;
+        }
+
+        .state-card h2 {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: .4rem;
+        }
+        .state-card p {
+            font-size: .9rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .state-card .round-display {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Black Han Sans', sans-serif;
+            color: var(--text);
+            margin: .5rem 0 1rem;
+        }
+        .state-card .round-display span { color: var(--primary); }
+
+        .btn-start {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: var(--radius);
+            padding: .75rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            display: inline-block;
+        }
+        .btn-start:hover { background: var(--primary-dark); }
+        .btn-start:active { transform: scale(.97); }
+
+        .btn-result {
+            background: var(--info);
+            color: #000;
+            border: none;
+            border-radius: var(--radius);
+            padding: .75rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            transition: background .2s;
+            display: inline-block;
+            margin-top: .5rem;
+        }
+        .btn-result:hover { filter: brightness(1.1); }
+
+        /* 준비 중 타워 로딩 표시 */
+        .loading-towers {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: 1.5rem;
+        }
+        .loading-bar-bg {
+            width: 200px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .loading-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 99px;
+            width: 0%;
+            transition: width .3s ease;
+        }
+        .loading-text { font-size: .8rem; color: var(--text-muted); }
+
+        /* ── 스크롤바 공통 ───────────────────────────────────── */
+        #tower-list::-webkit-scrollbar { width: 4px; }
+        #tower-list::-webkit-scrollbar-track { background: transparent; }
+        #tower-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+        /* ── 반응형 (소형 화면) ─────────────────────────────── */
+        @media (max-width: 768px) {
+            :root { --panel-w: 220px; --hud-h: 48px; }
+            .hud-logo { font-size: .95rem; }
+            .wave-progress { display: none; }
+        }
+    </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════
+     HUD (상단 바)
+══════════════════════════════════════════ -->
+<div id="hud">
+    <span class="hud-logo">⚔️ 길드 TD</span>
+    <div class="hud-divider"></div>
+
+    <div class="hud-stat">
+        <span class="label">라운드</span>
+        <span class="value round" id="hud-round">1</span>
+    </div>
+
+    <div class="hud-divider"></div>
+
+    <div class="hud-hp-wrap">
+        <span class="label">기지 HP &nbsp;<span id="hud-hp-text" style="color:var(--danger);font-weight:700">20</span> / 20</span>
+        <div class="hp-bar-bg">
+            <div class="hp-bar-fill" id="hud-hp-bar"></div>
+        </div>
+    </div>
+
+    <div class="hud-divider"></div>
+
+    <div class="hud-stat">
+        <span class="label">골드</span>
+        <span class="value gold" id="hud-gold">200</span>
+    </div>
+
+    <div class="hud-divider"></div>
+
+    <div class="hud-stat">
+        <span class="label">처치</span>
+        <span class="value score" id="hud-kills">0</span>
+    </div>
+
+    <div class="hud-divider"></div>
+
+    <div class="wave-progress">
+        <span class="label">웨이브 진행 &nbsp;<span id="wave-prog-text">0 / 0</span></span>
+        <div class="wave-bar-bg">
+            <div class="wave-bar-fill" id="wave-prog-bar"></div>
+        </div>
+    </div>
+
+    <div class="hud-right">
+        <button class="btn-speed" id="btn-speed" title="배속">⏩ x1</button>
+        <button class="btn-wave" id="btn-wave" disabled>웨이브 시작</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     메인 (캔버스 + 우측 패널)
+══════════════════════════════════════════ -->
+<div id="main">
+
+    <!-- 캔버스 -->
+    <div id="canvas-wrap">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- 중앙 안내 메시지 -->
+        <div id="canvas-overlay">
+            <div class="overlay-msg" id="canvas-msg" style="display:none">
+                <h2 id="canvas-msg-title">웨이브 클리어!</h2>
+                <p id="canvas-msg-body">다음 웨이브를 준비하세요</p>
+            </div>
+        </div>
+
+        <!-- 하단 배치 힌트 -->
+        <div id="place-hint">클릭하여 타워 배치 · ESC 취소</div>
+    </div>
+
+    <!-- 우측 패널 -->
+    <div id="side-panel">
+
+        <!-- 배치 가능 타워 목록 -->
+        <div class="panel-section" style="flex-shrink:0">
+            <div class="panel-title">🏯 배치 가능 타워</div>
+            <div id="tower-list">
+                <!-- game.js에서 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 선택된 배치 타워 상세 -->
+        <div id="tower-detail">
+            <div class="panel-title">📋 타워 정보</div>
+            <div class="detail-empty" id="detail-empty">
+                배치된 타워를<br/>클릭하면 정보가 표시됩니다
+            </div>
+            <div id="detail-content" style="display:none">
+                <div class="detail-header">
+                    <div class="detail-icon" id="detail-icon">?</div>
+                    <div>
+                        <div class="detail-name" id="detail-name">—</div>
+                        <div class="detail-job"  id="detail-job">—</div>
+                    </div>
+                </div>
+                <div class="detail-stats">
+                    <div class="stat-row"><span class="k">공격력</span><span class="v" id="stat-dmg">—</span></div>
+                    <div class="stat-row"><span class="k">사거리</span><span class="v" id="stat-range">—</span></div>
+                    <div class="stat-row"><span class="k">쿨다운</span><span class="v" id="stat-cd">—</span></div>
+                    <div class="stat-row"><span class="k">직업군</span><span class="v" id="stat-class">—</span></div>
+                </div>
+                <div id="passive-tag-wrap"></div>
+            </div>
+        </div>
+
+        <!-- 액티브 스킬 버튼 -->
+        <div id="active-skill-wrap">
+            <div class="panel-title">⚡ 액티브 스킬</div>
+            <div class="no-tower-msg" id="skill-no-tower">타워를 선택하면<br/>스킬을 사용할 수 있습니다</div>
+            <button class="active-skill-btn" id="active-skill-btn" style="display:none" disabled>
+                <div class="cooldown-ring-wrap" id="skill-ring-wrap">
+                    <!-- 쿨다운 링 SVG (game.js에서 주입) -->
+                    <div class="skill-icon-circle" id="skill-icon-circle" style="background:rgba(246,166,35,0.2)">⚡</div>
+                </div>
+                <div class="skill-btn-info">
+                    <div class="skill-btn-name" id="skill-btn-name">—</div>
+                    <div class="skill-btn-desc" id="skill-btn-desc">—</div>
+                </div>
+                <div class="skill-cooldown-overlay" id="skill-cd-overlay">
+                    <span id="skill-cd-text">0.0s</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- 게임 로그 -->
+        <div id="game-log">
+            <div class="panel-section" style="border-bottom:1px solid var(--border); flex-shrink:0; padding-bottom:.5rem">
+                <div class="panel-title" style="margin-bottom:0">📜 전투 로그</div>
+            </div>
+            <div id="log-list">
+                <!-- game.js에서 동적 추가 -->
+            </div>
+        </div>
+
+    </div><!-- /side-panel -->
+</div><!-- /main -->
+
+<!-- ══════════════════════════════════════════
+     게임 상태 오버레이 (시작 화면 / 게임오버 / 클리어)
+══════════════════════════════════════════ -->
+<div id="game-state-overlay">
+    <div class="state-card" id="state-card">
+
+        <!-- 로딩 상태 -->
+        <div id="state-loading">
+            <span class="state-icon">⚙️</span>
+            <h2>타워 준비 중</h2>
+            <p>길드원 직업 정보를 불러오고 있습니다</p>
+            <div class="loading-towers">
+                <div class="loading-bar-bg">
+                    <div class="loading-bar-fill" id="init-bar"></div>
+                </div>
+                <span class="loading-text" id="init-text">0 / 0</span>
+            </div>
+        </div>
+
+        <!-- 시작 대기 -->
+        <div id="state-ready" style="display:none">
+            <span class="state-icon">🏯</span>
+            <h2>준비 완료!</h2>
+            <p>타워를 배치하고 웨이브를 시작하세요<br/>
+                <span style="color:var(--primary)">3명</span> 이상 배치해야 시작 가능합니다</p>
+            <button class="btn-start" id="btn-close-overlay">게임 시작</button>
+        </div>
+
+        <!-- 게임 오버 -->
+        <div id="state-gameover" style="display:none">
+            <span class="state-icon">💀</span>
+            <h2>게임 오버</h2>
+            <p>기지가 함락되었습니다</p>
+            <div class="round-display">Round <span id="go-round">0</span></div>
+            <button class="btn-start" id="btn-save-result">결과 저장</button><br/>
+            <button class="btn-result" id="btn-go-result" style="display:none">결과 보기</button>
+        </div>
+
+        <!-- 웨이브 클리어 (전체) -->
+        <div id="state-clear" style="display:none">
+            <span class="state-icon">🏆</span>
+            <h2>클리어!</h2>
+            <p>모든 웨이브를 클리어했습니다!</p>
+            <div class="round-display">Round <span id="cl-round">0</span></div>
+            <button class="btn-start" id="btn-save-clear">결과 저장</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── 스크립트 ───────────────────────────────────────────── -->
+<script src="/js/game-data.js"></script>
+<script src="/js/game.js"></script>
 
 </body>
 </html>
